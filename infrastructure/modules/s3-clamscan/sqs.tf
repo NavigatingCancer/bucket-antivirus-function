@@ -1,18 +1,19 @@
 resource "aws_sqs_queue" "messages" {
-    name                    = "sqs-${var.env_name}-s3-antivirus-messages"
-    sqs_managed_sse_enabled = true
-    tags = {
-        "name"      = "sqs-${var.env_name}-s3-antivirus-messages"
-        "app"       = "s3-clamscan"
-        "env"       = var.env_name
-        "team"      = "sre"
-        "sensitive" = "yes"
-    }
+  name              = "sqs-${var.env_name}-s3-antivirus-messages"
+  kms_master_key_id = "alias/cmk-${var.env_name}"
+
+  tags = {
+    "name"      = "sqs-${var.env_name}-s3-antivirus-messages"
+    "app"       = "s3-clamscan"
+    "env"       = var.env_name
+    "team"      = "sre"
+    "sensitive" = "yes"
+  }
 }
 
 resource "aws_sqs_queue_policy" "messages" {
-    queue_url = aws_sqs_queue.messages.url
-    policy = <<POLICY
+  queue_url = aws_sqs_queue.messages.url
+  policy    = <<POLICY
 {
   "Version": "2012-10-17",
   "Id": "sqspolicy",
