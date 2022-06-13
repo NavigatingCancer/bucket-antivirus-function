@@ -110,7 +110,8 @@ data "aws_iam_policy_document" "main_scan" {
     effect = "Allow"
 
     actions = [
-      "kms:GenerateDataKey"
+      "kms:GenerateDataKey",
+      "kms:Decrypt"
     ]
 
     resources = ["${data.terraform_remote_state.kms_master_key.outputs.key_arn["cmk-${var.env_name}"]}"]
