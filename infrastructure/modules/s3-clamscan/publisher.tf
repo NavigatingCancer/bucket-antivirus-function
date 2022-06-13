@@ -41,16 +41,28 @@ data "aws_iam_policy_document" "main_publish" {
     effect = "Allow"
 
     actions = [
-        "sqs:SendMessage"
+      "sqs:SendMessage"
     ]
 
     resources = [aws_sqs_queue.messages.arn]
   }
+  # Allow access to env specific KMS keys 
+  statement {
+    sid = "AccessKMS"
+
+    effect = "Allow"
+
+    actions = [
+      "kms:GenerateDataKey"
+    ]
+
+    resources = ["${data.terraform_remote_state.kms_master_key.outputs.key_arn["cmk-${var.env_name}"]}"]
+  }
 }
 
 resource "aws_iam_role" "main_publish" {
-  name                 = "lmbrole-${var.env_name}-s3-clamscan-publisher"
-  assume_role_policy   = data.aws_iam_policy_document.assume_role_publish.json
+  name               = "lmbrole-${var.env_name}-s3-clamscan-publisher"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_publish.json
   tags = {
     "name"      = "lmbrole-${var.env_name}-s3-clamscan-publisher"
     "app"       = "s3-clamscan"
