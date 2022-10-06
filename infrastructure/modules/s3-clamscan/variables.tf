@@ -80,3 +80,18 @@ variable "av_scan_minutes" {
   default     = 1
   type        = number
 }
+
+variable "terraform_state_aws_profile" {
+  description = "The name of the AWS profile used to store Terraform remote state"
+  type        = string
+}
+
+variable "terraform_state_aws_region" {
+  description = "The AWS region of the S3 bucket used to store Terraform remote state"
+  type        = string
+}
+
+variable "terraform_state_s3_bucket" {
+  description = "The name of the S3 bucket used to store Terraform remote state"
+  type        = string
+}

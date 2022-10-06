@@ -103,11 +103,24 @@ data "aws_iam_policy_document" "main_scan" {
 
     resources = formatlist("%s/*", data.aws_s3_bucket.main_scan.*.arn)
   }
+
+  statement {
+    sid = "AccessKMS"
+
+    effect = "Allow"
+
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:Decrypt"
+    ]
+
+    resources = ["${data.terraform_remote_state.kms_master_key.outputs.key_arn["cmk-${var.env_name}"]}"]
+  }
 }
 
 resource "aws_iam_role" "main_scan" {
-  name                 = "lmbrole-${var.env_name}-s3-clamscan-scanner"
-  assume_role_policy   = data.aws_iam_policy_document.assume_role_scan.json
+  name               = "lmbrole-${var.env_name}-s3-clamscan-scanner"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_scan.json
   tags = {
     "name"      = "lmbrole-${var.env_name}-s3-clamscan-scanner"
     "app"       = "s3-clamscan"
@@ -185,10 +198,10 @@ resource "aws_lambda_function" "main_scan" {
 
   environment {
     variables = {
-      AV_DEFINITION_S3_BUCKET        = aws_s3_bucket.virus_definitions.id
-      AV_DEFINITION_S3_PREFIX        = var.lambda_package
-      AV_SCAN_BUCKET_NAME            = data.aws_s3_bucket.main_scan[0].id
-      SQS_QUEUE_URL                  = aws_sqs_queue.messages.url
+      AV_DEFINITION_S3_BUCKET = aws_s3_bucket.virus_definitions.id
+      AV_DEFINITION_S3_PREFIX = var.lambda_package
+      AV_SCAN_BUCKET_NAME     = data.aws_s3_bucket.main_scan[0].id
+      SQS_QUEUE_URL           = aws_sqs_queue.messages.url
     }
   }
 
